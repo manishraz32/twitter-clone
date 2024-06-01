@@ -7,6 +7,7 @@ import {v2 as cloudinary} from "cloudinary";
 import authRoutes from "./routes/auth.routes.js"
 import usersRoutes from "./routes/user.routes.js"
 import postRoutes from "./routes/post.routes.js";
+import notificationRoutes from "./routes/notification.route.js";
 
 
 import connectMongoDB from "./db/connectMongoDB.js";
@@ -30,6 +31,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.listen(PORT, () => {
     connectMongoDB();
