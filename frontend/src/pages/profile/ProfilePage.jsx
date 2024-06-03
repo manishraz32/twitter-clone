@@ -42,6 +42,7 @@ const ProfilePage = () => {
             reader.onload = () => {
                 state === "coverImg" && setCoverImg(reader.result);
                 state === "profileImg" && setProfileImg(reader.result);
+                console.log("readerResult", reader.result);
             };
             reader.readAsDataURL(file);
         }
