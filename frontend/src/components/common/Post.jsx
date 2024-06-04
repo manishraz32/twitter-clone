@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 
 import LoadingSpinner from "./LoadingSpinner";
+import { formatPostDate } from "../../utils/date";
 
 const Post = ({ post }) => {
     const [comment, setComment] = useState("");
@@ -32,24 +33,63 @@ const Post = ({ post }) => {
         }
     })
 
-    const postOwner = post.user;
+    const { mutate: likePost, isPending: isLiking } = useMutation({
+        mutationFn: async () => {
+            try {
+                const { data } = await axios.post(`/api/posts/like/${post._id}`);
+                return data;
+            } catch (error) {
+
+            }
+        },
+        onSuccess: (updatedLike) => {
+            queryClient.invalidateQueries({ queryKey: ["posts"] })
+        }
+    })
+
+    const { mutate: commentPost, isPending: isCommenting } = useMutation({
+        mutationFn: async () => {
+            try {
+                const { data } = await axios.post(`/api/posts/comment/${post._id}`, {
+                    text: comment,
+                });
+                return data;
+            } catch (error) {
+                console.log("commentPost_Error", error);
+            }
+        },
+        onSuccess: () => {
+            toast.success("Comment posted successfully");
+            setComment("");
+            queryClient.invalidateQueries({ queryKey: ["posts"] })
+        },
+        onError: (error) => {
+            console.log("postError", error);
+        }
+    })
+
+    const postOwner = post.likes.includes(authUser._id);
     const isLiked = false;
 
     const isMyPost = authUser._id === post.user._id;
 
-    const formattedDate = "1h";
+    const formattedDate = formatPostDate(post.createdAt);
 
-    const isCommenting = false;
 
     const handleDeletePost = () => {
         deletePost();
     };
 
     const handlePostComment = (e) => {
+        if (isCommenting) return;
+        commentPost();
         e.preventDefault();
     };
 
-    const handleLikePost = () => { };
+    const handleLikePost = () => {
+        if (isLiking) return;
+        likePost();
+    };
 
     return (
         <>
@@ -160,13 +200,13 @@ const Post = ({ post }) => {
                                 <span className='text-sm text-slate-500 group-hover:text-green-500'>0</span>
                             </div>
                             <div className='flex gap-1 items-center group cursor-pointer' onClick={handleLikePost}>
-                                {!isLiked && (
+                                {!isLiked && !isLiking && (
                                     <FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500' />
                                 )}
-                                {isLiked && <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500 ' />}
+                                {isLiked && !isLiking && <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500 ' />}
 
                                 <span
-                                    className={`text-sm text-slate-500 group-hover:text-pink-500 ${isLiked ? "text-pink-500" : ""
+                                    className={`text-sm  group-hover:text-pink-500 ${isLiked ? "text-pink-500" : "text-slate-500"
                                         }`}
                                 >
                                     {post.likes.length}
