@@ -1,7 +1,7 @@
 import express from 'express';
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import {v2 as cloudinary} from "cloudinary";
+import { v2 as cloudinary } from "cloudinary";
 
 
 import authRoutes from "./routes/auth.routes.js"
@@ -26,7 +26,7 @@ const PORT = process.env.PORT || 5000 // 8000
 app.use(express.json()); // to parse req.body
 app.use(express.urlencoded({ extended: true })); // to parse form data(urlencoded)
 
-app.use(cookieParser());
+app.use(cookieParser({ limit: "5mb" }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
@@ -34,6 +34,6 @@ app.use("/api/posts", postRoutes);
 app.use("/api/notifications", notificationRoutes);
 
 app.listen(PORT, () => {
-    connectMongoDB();
-    console.log(`server is running at port ${PORT}`);
+	connectMongoDB();
+	console.log(`server is running at port ${PORT}`);
 })
