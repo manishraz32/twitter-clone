@@ -5,6 +5,9 @@ import XSvg from "../../../components/svgs/X";
 
 import { MdOutlineMail } from "react-icons/md";
 import { MdPassword } from "react-icons/md";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
@@ -12,16 +15,38 @@ const LoginPage = () => {
         password: "",
     });
 
+    const queryClient = useQueryClient();
+
+    const { mutate: loginMutate, isError, isPending, error } = useMutation({
+        mutationFn: async ({ username, password }) => {
+            try {
+                const response = await axios.post("/api/auth/login", { username, password });
+                return response?.data;
+            } catch (error) {
+                console.log("error: ", error?.response?.data);
+                throw error?.response?.data;
+            }
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["authUser"] });
+        },
+        onError: (error) => {
+            console.log("onError: ", error);
+            const errorMessage = error?.response?.data?.error || 'An error occurred during signup';
+            toast.error(errorMessage);
+        },
+    })
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log(formData);
+        loginMutate(formData);
     };
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const isError = false;
+    console.log("error ", error);
 
     return (
         <div className='max-w-screen-xl mx-auto flex h-screen'>
@@ -56,7 +81,7 @@ const LoginPage = () => {
                         />
                     </label>
                     <button className='btn rounded-full btn-primary text-white'>Login</button>
-                    {isError && <p className='text-red-500'>Something went wrong</p>}
+                    {isError && <p className='text-red-500'>{error?.error || "some error occur"}</p>}
                 </form>
                 <div className='flex flex-col gap-2 mt-4'>
                     <p className='text-white text-lg'>{"Don't"} have an account?</p>
