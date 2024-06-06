@@ -10,6 +10,7 @@ import { MdDriveFileRenameOutline } from "react-icons/md";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const SignUpPage = () => {
     const [formData, setFormData] = useState({
@@ -18,7 +19,7 @@ const SignUpPage = () => {
         fullName: "",
         password: "",
     });
-
+    const navigate = useNavigate();
 
     const { mutate, isError, isPending, error } = useMutation({
         mutationFn: async ({ email, username, fullName, password }) => {
@@ -31,8 +32,8 @@ const SignUpPage = () => {
             }
         },
         onSuccess: (data) => {
-            console.log("data", data);
             toast.success("Account created successfully");
+            navigate("/login");
         },
         onError: (error) => {
             console.log("onError: ", error);

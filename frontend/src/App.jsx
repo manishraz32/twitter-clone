@@ -16,24 +16,28 @@ import axios from 'axios';
 function App() {
 
   const { data: authUser, isLoading, error } = useQuery({
+    // we use queryKey to give a unique name to our query and refer to it later
     queryKey: ["authUser"],
     queryFn: async () => {
       try {
-        const { data } = await axios.get("/api/auth/me");
-        console.log("data", data);
-        if (data?.error) return null;
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+        if (data.error) return null;
+        if (!res.ok) {
+          throw new Error(data.error || "Something went wrong");
+        }
+        console.log("authUser is here:", data);
         return data;
       } catch (error) {
-        throw error?.response?.data;
+        throw new Error(error);
       }
     },
     retry: false,
-  })
-  console.log("error", error)
-  console.log("authUser", authUser);
+  });
+
   if (isLoading) {
     return (
-      <div className="h-screen justify-center items-center">
+      <div className="h-screen w-full flex justify-center items-center">
         <LoadingSpinner size='lg' />
       </div>
     )
