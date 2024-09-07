@@ -41,7 +41,7 @@ const NotificationPage = () => {
     // const deleteNotifications = () => {
     //     alert("All notifications deleted");
     // };
-
+    console.log("notifications", notifications);
     return (
         <>
             <div className='flex-[4_4_0] border-l border-r border-gray-700 min-h-screen'>
